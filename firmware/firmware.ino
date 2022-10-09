@@ -1,23 +1,11 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
-#include <WiFiMulti.h>
 #include <ArduinoWebsockets.h>
-#include <WiFi.h>
-
+#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 #include <Wire.h>
 #include <SPI.h>
 #include <UNIT_PN532.h>
-
-//Wi-fi settings//
-#define SECRET_SSID "exampleSSID"
-#define SECRET_PASS "examplePASSWORD"
-#define CAB_IP "192.168.1.125"
-
-//Define the pins for SPI communication.
-#define PN532_SCK  (18)
-#define PN532_MOSI (23)
-#define PN532_SS   (14)
-#define PN532_MISO (19)
+#include "hivemind_config.h"
 
 TaskHandle_t ReaderThread;
 TaskHandle_t StatsThread;
@@ -25,9 +13,7 @@ TaskHandle_t StatsThread;
 UNIT_PN532 nfc(PN532_SS);
 
 /*
- * 
  * Track the game stats
- * 
  */
 
 const char* websockets_server_host = CAB_IP; //Enter server adress
@@ -35,82 +21,15 @@ const uint16_t websockets_server_port = 12749; // Enter server port
 
 using namespace websockets;
 
-void onMessageCallback(WebsocketsMessage message) {
-    Serial.print("Got Message: ");
-    Serial.println(message.data());
-}
-
-void onEventsCallback(WebsocketsEvent event, String data) {
-    if(event == WebsocketsEvent::ConnectionOpened) {
-        Serial.println("Connnection Opened");
-    } else if(event == WebsocketsEvent::ConnectionClosed) {
-        Serial.println("Connnection Closed");
-    } else if(event == WebsocketsEvent::GotPing) {
-        Serial.println("Got a Ping!");
-    } else if(event == WebsocketsEvent::GotPong) {
-        Serial.println("Got a Pong!");
-    }
-}
-
-
-/*
- * 
- * Posting card data back to hivemind for sign-in
- * 
- */
- 
-void postDataToServer() {
- 
-  Serial.println("Posting JSON data to server...");
-  // Block until we are able to connect to the WiFi access point
-
-  HTTPClient http;
-  http.begin("https://kqhivemind.com/api/stats/signin/nfc/");  
-  http.addHeader("Content-Type", "application/json");         
-     
-  StaticJsonDocument<200> doc;
-  // Add values in the document
-  //
-  doc["scene_name"] = "slc";
-  doc["cabinet_name"] = "hive";
-  doc["token"] = "G_LkYIJ6MuuC2bQdbR3MH3bjxgxPMXF1dEJhM5R2rT0";
-  doc["action"] = "sign_in";
-  doc["card"] = "04584b91720000";
-  doc["player"] = "1";
-     
-  String requestBody;
-  serializeJson(doc, requestBody);
-     
-  int httpResponseCode = http.POST(requestBody);
- 
-  if(httpResponseCode>0){
-       
-    String response = http.getString();                       
-       
-    Serial.println(httpResponseCode);   
-    Serial.println(response); 
-  }
-}
-
-/////// Wifi Settings ///////
-char ssid[] = SECRET_SSID;
-char pass[] = SECRET_PASS;
-WiFiMulti wifiMulti;
 WebsocketsClient client;
 
 /*
- * 
  * Setup
- * 
  */
  
 void setup() {
-  /////////////Get things setu-up and wifi connected/////////////
-  Serial.begin(9600);
-   
-  delay(4000);
-  wifiMulti.addAP(ssid, pass);
-  delay(4000);
+  /////////////Get things setup and wifi connected with captive portal/////////////
+  hivemind_wifi_setup();
 
   /////////////Connect to cab/////////////
   // run callback when messages are received
@@ -141,9 +60,7 @@ void setup() {
 }
 
 /*
- * 
- * The loop that keeps on going with multi threading
- * 
+ * Reader loop that waits and scans cards
  */
  
 void ReaderLoop(void * pvParameters){
@@ -170,6 +87,11 @@ void ReaderLoop(void * pvParameters){
     Serial.println("Timed out waiting for a card");
   }
 }
+
+/*
+ * The always going stats loop
+ */
+
 void StatLoop(void * pvParameters){
   client.poll();
   client.send("![k[im alive],v[1]]!");

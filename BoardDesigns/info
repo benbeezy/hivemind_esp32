@@ -4,7 +4,7 @@
   "name": "KQ rfid reader",
   "content": "",
   "created_at": "2022-05-28 04:19:26",
-  "updated_at": "2022-09-15 16:30:10",
+  "updated_at": "2022-10-08 23:37:56",
   "stick": "",
   "documents": [
     {
@@ -15,13 +15,12 @@
       "master": "",
       "thumb": "/images/thumb-default.png",
       "components": {
+        "120dc7e7e9344722aae98a6926a6fae8": 1,
         "f160f1d9d96d4b0584a1e2e22962e4c8": 1,
         "98a9ad0fdd874d3380e2e80151b26686": 1,
         "317a79a6c57644539c01fb0029b3c54b": 1,
         "356d9526569f427181d0b9083708db25": 1,
         "321f0218ba3446068073ab844ba42967": 5,
-        "120dc7e7e9344722aae98a6926a6fae8": 1,
-        "df8a5fce0cb24eafb57702a6482160e5": 1,
         "d06e004e61624c928fa557f7f379f54f": 1
       },
       "BOM": [
@@ -36,7 +35,7 @@
           "PM254-1-04-Z-8.5",
           5,
           "HDR-TH_4P-P2.54-V-F",
-          "ABS,CHECKS,QUEEN,SKULLY,STRIPES",
+          "ABS,CHECKS,QUEEN,SKULLS,STRIPES",
           {
             "BOM_Supplier": "LCSC",
             "BOM_Supplier Part": "C2897367",
@@ -59,21 +58,6 @@
             "BOM_Supplier": "",
             "puuid": "3a674a6d1c9b41b5a965d344dbbaa800",
             "uuid": "98a9ad0fdd874d3380e2e80151b26686"
-          }
-        ],
-        [
-          "321014SG0ABK00A01",
-          1,
-          "IDC-TH_14P-P2.54-V-R2-C7-S2.54",
-          "H1",
-          {
-            "BOM_Supplier": "LCSC",
-            "BOM_Supplier Part": "C429963",
-            "BOM_Manufacturer": "JILN",
-            "BOM_Manufacturer Part": "321014SG0ABK00A01",
-            "BOM_JLCPCB Part Class": "Extended Part",
-            "puuid": "45a845d64c044188803b824eebdc3c05",
-            "uuid": "df8a5fce0cb24eafb57702a6482160e5"
           }
         ],
         [
@@ -140,11 +124,11 @@
           }
         ]
       ],
-      "updateTime": 1653894403,
+      "updateTime": 1665292458,
       "createTime": 1653733166,
       "histories": [],
       "created_at": "2022-05-28 04:19:26",
-      "updated_at": "2022-05-30 01:06:43"
+      "updated_at": "2022-10-08 23:14:18"
     },
     {
       "uuid": "29ca3bf14d9325e9dc4005d2876e97f2",
@@ -179,26 +163,25 @@
       "master": "",
       "thumb": "/images/thumb-default.png",
       "components": {
-        "45a845d64c044188803b824eebdc3c05": 1,
+        "8f78b31c15d54ef69278fa188fb193ea": 5,
         "b42f27a365564169abf40071aa74200d": 1,
         "1b4db0953b0546f09cfd565759c7299b": 1,
         "3a674a6d1c9b41b5a965d344dbbaa800": 1,
         "a946ebd6475545efaec5fc4d5959b22a": 1,
         "97ea3066bfaf4cccabc9bf6d14ea9eb0": 1,
-        "b3dbbda3605a485d91561b5d51a26a0d": 1,
-        "8f78b31c15d54ef69278fa188fb193ea": 5
+        "b3dbbda3605a485d91561b5d51a26a0d": 1
       },
       "BOM": [],
-      "updateTime": 1663281010,
+      "updateTime": 1665293876,
       "createTime": 1653794880,
       "histories": [],
       "created_at": "2022-05-28 21:28:00",
-      "updated_at": "2022-09-15 16:30:10"
+      "updated_at": "2022-10-08 23:37:56"
     }
   ],
   "sort": [],
   "title": "KQ rfid reader",
   "foldername": "KQ rfid reader",
   "schfilename": "KQ rfid reader.json",
-  "schfilemtime": 1653894403669
+  "schfilemtime": 1665292458258
 }
