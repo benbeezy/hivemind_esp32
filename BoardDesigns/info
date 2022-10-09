@@ -1,0 +1,204 @@
+{
+  "uuid": "e9fd592192bac35d7b2ed6900e0b93db",
+  "path": "Offline/KQ%20rfid%20reader",
+  "name": "KQ rfid reader",
+  "content": "",
+  "created_at": "2022-05-28 04:19:26",
+  "updated_at": "2022-09-15 16:30:10",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "ea944ba9a07b92cc2659b8b0a426e83d",
+      "title": "Sheet_1",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "f160f1d9d96d4b0584a1e2e22962e4c8": 1,
+        "98a9ad0fdd874d3380e2e80151b26686": 1,
+        "317a79a6c57644539c01fb0029b3c54b": 1,
+        "356d9526569f427181d0b9083708db25": 1,
+        "321f0218ba3446068073ab844ba42967": 5,
+        "120dc7e7e9344722aae98a6926a6fae8": 1,
+        "df8a5fce0cb24eafb57702a6482160e5": 1,
+        "d06e004e61624c928fa557f7f379f54f": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "PM254-1-04-Z-8.5",
+          5,
+          "HDR-TH_4P-P2.54-V-F",
+          "ABS,CHECKS,QUEEN,SKULLY,STRIPES",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C2897367",
+            "BOM_Manufacturer": "HCTL(华灿天禄)",
+            "BOM_Manufacturer Part": "PM254-1-04-Z-8.5",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "8f78b31c15d54ef69278fa188fb193ea",
+            "uuid": "321f0218ba3446068073ab844ba42967"
+          }
+        ],
+        [
+          "Connector Neopixel IN",
+          1,
+          "CONNECTOR NEOPIXEL IN",
+          "C1",
+          {
+            "BOM_Manufacturer": "Marco",
+            "BOM_Manufacturer Part": "",
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "puuid": "3a674a6d1c9b41b5a965d344dbbaa800",
+            "uuid": "98a9ad0fdd874d3380e2e80151b26686"
+          }
+        ],
+        [
+          "321014SG0ABK00A01",
+          1,
+          "IDC-TH_14P-P2.54-V-R2-C7-S2.54",
+          "H1",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C429963",
+            "BOM_Manufacturer": "JILN",
+            "BOM_Manufacturer Part": "321014SG0ABK00A01",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "45a845d64c044188803b824eebdc3c05",
+            "uuid": "df8a5fce0cb24eafb57702a6482160e5"
+          }
+        ],
+        [
+          "POWER IN",
+          1,
+          "POWER",
+          "JP1",
+          {
+            "BOM_Manufacturer Part": "",
+            "puuid": "b42f27a365564169abf40071aa74200d",
+            "uuid": "356d9526569f427181d0b9083708db25"
+          }
+        ],
+        [
+          "RASPBERRYPI-B+-GPIO",
+          1,
+          "2X20-NO SILK",
+          "JP2",
+          {
+            "BOM_Manufacturer Part": "",
+            "puuid": "1b4db0953b0546f09cfd565759c7299b",
+            "uuid": "d06e004e61624c928fa557f7f379f54f"
+          }
+        ],
+        [
+          "DOIT ESP32 DEVKIT ESP-WROOM-32 CP2102 WIFI Bluetooth ESP8266 w/ label",
+          1,
+          "DOIT-ESP32-DEVKIT-V1",
+          "U1",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "Ali Express",
+            "BOM_Manufacturer Part": "",
+            "puuid": "97ea3066bfaf4cccabc9bf6d14ea9eb0",
+            "uuid": "120dc7e7e9344722aae98a6926a6fae8"
+          }
+        ],
+        [
+          "Elechouse RFID V3",
+          1,
+          "RFID READER PN532 ELECHOUSE",
+          "U2",
+          {
+            "BOM_Manufacturer": "Elechouse",
+            "BOM_Manufacturer Part": "",
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "puuid": "a946ebd6475545efaec5fc4d5959b22a",
+            "uuid": "f160f1d9d96d4b0584a1e2e22962e4c8"
+          }
+        ],
+        [
+          "2.54 mm 3 Pin JSt",
+          1,
+          "3PIN_2.54_MM_JST_XHP_JST_CONNECTOR_FOR_DC_SOCKET",
+          "U3",
+          {
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "puuid": "b3dbbda3605a485d91561b5d51a26a0d",
+            "uuid": "317a79a6c57644539c01fb0029b3c54b"
+          }
+        ]
+      ],
+      "updateTime": 1653894403,
+      "createTime": 1653733166,
+      "histories": [],
+      "created_at": "2022-05-28 04:19:26",
+      "updated_at": "2022-05-30 01:06:43"
+    },
+    {
+      "uuid": "29ca3bf14d9325e9dc4005d2876e97f2",
+      "puuid": "e9fd592192bac35d7b2ed6900e0b93db",
+      "title": "PCB_KQ rfid reader",
+      "filename": "PCB_KQ rfid reader.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "3a674a6d1c9b41b5a965d344dbbaa800": 1,
+        "97ea3066bfaf4cccabc9bf6d14ea9eb0": 1,
+        "a946ebd6475545efaec5fc4d5959b22a": 1,
+        "b3dbbda3605a485d91561b5d51a26a0d": 1,
+        "b42f27a365564169abf40071aa74200d": 1
+      },
+      "BOM": [],
+      "updateTime": 1653792895,
+      "createTime": 1653734518,
+      "histories": [],
+      "created_at": "2022-05-28 04:41:58",
+      "updated_at": "2022-05-28 20:54:55"
+    },
+    {
+      "uuid": "b9777344101687324d88228f5a902298",
+      "puuid": "e9fd592192bac35d7b2ed6900e0b93db",
+      "title": "PCB_KQ rfid reader_2",
+      "filename": "PCB_KQ rfid reader_2.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "45a845d64c044188803b824eebdc3c05": 1,
+        "b42f27a365564169abf40071aa74200d": 1,
+        "1b4db0953b0546f09cfd565759c7299b": 1,
+        "3a674a6d1c9b41b5a965d344dbbaa800": 1,
+        "a946ebd6475545efaec5fc4d5959b22a": 1,
+        "97ea3066bfaf4cccabc9bf6d14ea9eb0": 1,
+        "b3dbbda3605a485d91561b5d51a26a0d": 1,
+        "8f78b31c15d54ef69278fa188fb193ea": 5
+      },
+      "BOM": [],
+      "updateTime": 1663281010,
+      "createTime": 1653794880,
+      "histories": [],
+      "created_at": "2022-05-28 21:28:00",
+      "updated_at": "2022-09-15 16:30:10"
+    }
+  ],
+  "sort": [],
+  "title": "KQ rfid reader",
+  "foldername": "KQ rfid reader",
+  "schfilename": "KQ rfid reader.json",
+  "schfilemtime": 1653894403669
+}
