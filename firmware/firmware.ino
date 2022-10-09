@@ -28,6 +28,19 @@ WebsocketsClient client;
  */
  
 void setup() {
+  /////////////Setup pins///////////////
+  pinMode(skulls_button, INPUT);
+  pinMode(abs_button, INPUT);
+  pinMode(checks_button, INPUT);
+  pinMode(queen_button, INPUT);
+  pinMode(stripes_button, INPUT);
+
+  pinMode(skulls_led, OUTPUT);
+  pinMode(abs_led, OUTPUT);
+  pinMode(checks_led, OUTPUT);
+  pinMode(queen_led, OUTPUT);
+  pinMode(stripes_led, OUTPUT);
+  
   /////////////Get things setup and wifi connected with captive portal/////////////
   hivemind_wifi_setup();
 
@@ -67,7 +80,6 @@ void ReaderLoop(void * pvParameters){
   boolean success;
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
   uint8_t uidLength;        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
-
   success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
 
   if (success) {
@@ -78,8 +90,8 @@ void ReaderLoop(void * pvParameters){
       Serial.print(" 0x");Serial.print(uid[i], HEX);
     }
     Serial.println("");
-    // Wait 1 second before continuing
     delay(1000);
+    dimLEDs();
   }
   else
   {
