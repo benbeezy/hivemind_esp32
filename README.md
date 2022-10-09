@@ -20,6 +20,11 @@ A open sourced board design, and firmware to work with an esp32, pn532, and kqhi
 5) Select part (Tools -> Port -> YOUR BOARD PORT)
 6) Upload (button on the top left with an arrow)
 
+## Issues you might have
+1) esptool.py crashing for no real reason
+  - to fix this drop the upload speed down, try 115200
+  
+
 ## Board design
 Schematic overview | Back of board | Front of board
 --- | --- | ---
