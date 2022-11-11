@@ -19,6 +19,15 @@ void flashLEDs(){
   delay(500);
 }
 
+String getParam(String name){
+  //read parameter from server, for customhmtl input
+  String value;
+  if(wm.server->hasArg(name)) {
+    value = wm.server->arg(name);
+  }
+  return value;
+}
+
 void setLEDs(){
   //abs
   if(absStatus == true){digitalWrite(abs_led, HIGH);}

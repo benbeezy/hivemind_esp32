@@ -11,6 +11,7 @@ TaskHandle_t ReaderThread;
 TaskHandle_t StatsThread;
 
 UNIT_PN532 nfc(PN532_SS);
+String lastScanID = "";
 
 /*
  * Track the game stats
@@ -77,26 +78,28 @@ void setup() {
  */
  
 void ReaderLoop(void * pvParameters){
-  boolean success;
-  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
-  uint8_t uidLength;        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
-  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
+  for(;;) {
+    boolean success;
+    uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
+    uint8_t uidLength;        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+    success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
 
-  if (success) {
-    Serial.println("Found a card!");
-    Serial.print("UID Value: ");
-    for (uint8_t i=0; i < uidLength; i++)
-    {
-      Serial.print(" 0x");Serial.print(uid[i], HEX);
+    if (success) {
+      Serial.println("Found a card!");
+      Serial.print("UID Value: ");
+      for (uint8_t i=0; i < uidLength; i++)
+      {
+        lastScanID = lastScanID + uid[i];
+      }
+      Serial.println(lastScanID);
+      dimLEDs();
+      delay(1000);
     }
-    Serial.println("");
-    delay(1000);
-    dimLEDs();
-  }
-  else
-  {
-    // PN532 probably timed out waiting for a card
-    Serial.println("Timed out waiting for a card");
+    else
+    {
+      // PN532 probably timed out waiting for a card
+      Serial.println("Waiting for a card");
+    }
   }
 }
 
@@ -105,8 +108,11 @@ void ReaderLoop(void * pvParameters){
  */
 
 void StatLoop(void * pvParameters){
-  client.poll();
-  client.send("![k[im alive],v[1]]!");
+  for(;;) {
+    //client.poll();
+    //client.send("![k[im alive],v[1]]!");
+    //TO-DO: Make it post to hivemind, use the hivemind_stats.ino file
+  }
 }
 
 void loop() {
