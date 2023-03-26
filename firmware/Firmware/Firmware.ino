@@ -1,3 +1,6 @@
+#include <ArduinoJson.h>
+#include <HTTPClient.h>
+#include <ArduinoWebsockets.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <UNIT_PN532.h> // https://github.com/elechouse/PN532
@@ -185,17 +188,6 @@ void ReadNFC(){
     // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
     success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
     if (success) {
-      
-      for(int i=0; i<NUMPIXELS; i++) {
-          pixels.setPixelColor(i, pixels.Color(0, 128, 0));
-      }
-      pixels.show();   // Send the updated pixel colors to the hardware.
-      delay(1000);
-      for(int i=0; i<NUMPIXELS; i++) {
-          pixels.setPixelColor(i, pixels.Color(0, 0, 0));
-      }
-
-      pixels.show(); // turn off pixels
       // Wait 1 second before continuing
       Serial.println("Found a card!");
       Serial.print("UID Length: ");Serial.print(uidLength, DEC);Serial.println(" bytes");
