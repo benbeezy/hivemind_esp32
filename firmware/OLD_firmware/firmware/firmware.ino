@@ -69,7 +69,7 @@ void setup() {
   // configure board to read RFID tags
   nfc.SAMConfig();
 
-  Serial.println("Card reader setup and reader to scan...");
+  Serial.println("Card reader setup and ready to scan...");
 }
 
 /*

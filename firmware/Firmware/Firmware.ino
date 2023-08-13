@@ -1,111 +1,136 @@
+#include <FS.h>                   //this needs to be first, or it all crashes and burns...
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <ArduinoWebsockets.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <UNIT_PN532.h> // https://github.com/elechouse/PN532
-
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 #include <Adafruit_NeoPixel.h> // https://github.com/adafruit/Adafruit_NeoPixel
 #define PN532_SS 14 // The digital data pin the NFC reader is connected.
 #define RGBpin 13  // The pin on the ESP32 that controls all of the RGB devices.
 #define NUMPIXELS 5 // standard for the KQ board layout, change if you use the RGB headers
+
+#ifdef ESP32
+  #include <SPIFFS.h>
+#endif
+
 Adafruit_NeoPixel pixels(NUMPIXELS, RGBpin, NEO_GRB + NEO_KHZ800);
 UNIT_PN532 nfc(PN532_SS);
+
 /*
 All arrays are in stripes, abs, queen, skulls, checks order.
 */
 const int Buttons[] = {32, 26, 33, 27, 25};
 const int BtnLEDs[] = {0, 0, 0, 0, 0};
 const bool FlipLights = false;
+
 // Just holding the button states
 int ButtonStates[] = {0,0,0,0,0};
 int PlayerSignInStates[] = {0,0,0,0,0};
+
 // In RGB values, can go up to 255 but it pulls a lot of power an can cause bad logic
 int LightColor[3] = {128, 128, 128};
 
-WiFiManager wm;
-WiFiManagerParameter token; // global param ( for non blocking w params )
-WiFiManagerParameter cabinet_ip; // global param ( for non blocking w params )
-WiFiManagerParameter hivemind_ip; // global param ( for non blocking w params )
-WiFiManagerParameter cab_color; // global param ( for non blocking w params )
+TaskHandle_t NFCloop;
+
+//flag for saving data
+bool shouldSaveConfig = false;
+
+//callback notifying us of the need to save config
+void saveConfigCallback () {
+  Serial.println("Should save config");
+  shouldSaveConfig = true;
+}
 
 void setup() {
-    // WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-    Serial.begin(115200);
+  // WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
+  Serial.begin(115200);
 
-    // INITIALIZE all the pins
-    for (int thisPlayer = 0; thisPlayer < 5; thisPlayer++) {
-      pinMode(Buttons[thisPlayer], INPUT_PULLUP);
-    }
 
-    // INITIALIZE NeoPixel strip object
-    pixels.begin();
-    pixels.clear();
-    wm.setClass("invert"); // set dark theme
+  // INITIALIZE all the pins
+  for (int thisPlayer = 0; thisPlayer < 5; thisPlayer++) {
+    pinMode(Buttons[thisPlayer], INPUT_PULLUP);
+  }
 
-    int token_length = 45; // How long can your API key be
-    int cabinet_ip_length = 32; // How long can your API key be
-    int hivemind_ip_length = 32; // How long can your API key be
+  // INITIALIZE NeoPixel strip object
+  pixels.begin();
+  pixels.clear();
+  wm.setClass("invert"); // set dark theme
 
-    new (&token) WiFiManagerParameter("clienttoken", "Client token", "", token_length,"placeholder=\"Client token\"");
-    new (&cabinet_ip) WiFiManagerParameter("cabinetip", "Cabinet IP", "kq.local", cabinet_ip_length,"placeholder=\"192.168.x.x\"");
-    new (&hivemind_ip) WiFiManagerParameter("hivemindip", "Hivemind IP", "kqhivemind.com", hivemind_ip_length,"placeholder=\"kqhivemind.com\"");
-    const char* custom_radio_str = "<br/><label for='customfieldid'>Custom Field Label</label><input type='radio' name='customfieldid' value='blue' checked> Blue<br><input type='radio' name='customfieldid' value='gold'> Gold";
-    new (&cab_color) WiFiManagerParameter(custom_radio_str); // custom html input
-  
-    wm.addParameter(&token);
-    wm.addParameter(&cabinet_ip);
-    wm.addParameter(&hivemind_ip);
-    wm.addParameter(&cab_color);
+  WiFiManagerParameter token("server", "mqtt server", mqtt_server, 40);
+  WiFiManagerParameter scene_name("port", "mqtt port", mqtt_port, 6);
+  WiFiManagerParameter cabinet_ip("apikey", "API token", api_token, 32);
+  WiFiManagerParameter ("apikey", "API token", api_token, 32);
 
-    std::vector<const char *> menu = {"param","wifi","info","sep","restart","exit"};
-    wm.setMenu(menu);
+  wm.addParameter(&token);
+  wm.addParameter(&scene_name);
+  wm.addParameter(&cabinet_ip);
+  wm.addParameter(&hivemind_ip);
+  wm.addParameter(&cab_color);
 
-    // RESET our configs if you hold down queen while booting
-    if(digitalRead(Buttons[2]) == 0){
-        Serial.println("Resetting wifi");
-        wm.resetSettings(); // Rest all of the wifi settings, this includes hivemind info.
-        Wifi_fail();
-        Wifi_succeed();
-    }
-    wm.setSaveParamsCallback(saveParamCallback);
-    // Boot lights let us know everything has started and we finishing our boot process
-    BootLights();
-    pixels.clear();
+  std::vector<const char *> menu = {"param","wifi","info","sep","restart","exit"};
+  wm.setMenu(menu);
 
-    bool res;
-    res = wm.autoConnect("KQ_HiveMind","killerqueen"); // password protected ap
+  // RESET our configs if you hold down queen while booting
+  if(digitalRead(Buttons[2]) == 0){
+      Serial.println("Formatting file system...")
+      SPIFFS.format();
+      Serial.println("Resetting wifi...");
+      wm.resetSettings(); // Rest all of the wifi settings, this includes hivemind info.
+      Wifi_fail();
+      Wifi_succeed();
+  }
+  wm.setSaveParamsCallback(saveParamCallback);
+  // Boot lights let us know everything has started and we finishing our boot process
+  BootLights();
+  pixels.clear();
 
-    if(!res) {
-        Wifi_fail();
-    } 
-    else {
-        Wifi_succeed();
-    }
+  bool res;
+  res = wm.autoConnect("KQ_HiveMind","killerqueen"); // password protected ap
 
-    // INITIALIZE our NFC reader
-    nfc.begin();
-    uint32_t versiondata = nfc.getFirmwareVersion();
-    if (! versiondata) {
-      Serial.print("Didn't find PN53x board");
-      NFC_fail();
-      while (1); // halt
-    }
+  if(!res) {
+      Wifi_fail();
+  } 
+  else {
+      Wifi_succeed();
+  }
 
-    Serial.print("NFC reader ver. "); 
-    Serial.print((versiondata>>16) & 0xFF, DEC);
-    Serial.print('.'); 
-    Serial.println((versiondata>>8) & 0xFF, DEC);
+  // INITIALIZE our NFC reader
+  nfc.begin();
+  uint32_t versiondata = nfc.getFirmwareVersion();
+  if (! versiondata) {
+    Serial.print("Didn't find PN53x board");
+    NFC_fail();
+    while (1); // halt
+  }
 
-    // Set the max number of retry attempts to read from a card
-    // This prevents us from waiting forever for a card, which is
-    // the default behaviour of the PN532.
-    nfc.setPassiveActivationRetries(0xFF);
+  Serial.print("NFC reader ver. "); 
+  Serial.print((versiondata>>16) & 0xFF, DEC);
+  Serial.print('.'); 
+  Serial.println((versiondata>>8) & 0xFF, DEC);
 
-    // configure board to read RFID tags
-    nfc.SAMConfig();
-    Serial.println("Waiting for an ISO14443A card");
+  // Set the max number of retry attempts to read from a card
+  // This prevents us from waiting forever for a card, which is
+  // the default behaviour of the PN532.
+  nfc.setPassiveActivationRetries(0xFF);
+
+  // configure board to read RFID tags
+  nfc.SAMConfig();
+  Serial.println("Waiting for an ISO14443A card");
+
+
+  //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
+  xTaskCreatePinnedToCore(
+                    ReadNFC,       // Task function.
+                    "NFCloop",     // name of task.
+                    10000,         // Stack size of task
+                    NULL,          // parameter of the task
+                    1,             // priority of the task
+                    &NFCloop,      // Task handle to keep track of created task
+                    0);            // pin task to core 0   
+          
+  delay(500); 
 }
 
 String getParam(String name){
@@ -117,9 +142,44 @@ String getParam(String name){
   return value;
 }
 
+void postDataToServer() {
+ 
+  Serial.println("Posting JSON data to server...");
+  // Block until we are able to connect to the WiFi access point
+
+  HTTPClient http;
+  http.begin("https://kqhivemind.com/api/stats/signin/nfc/");  
+  http.addHeader("Content-Type", "application/json");         
+     
+  StaticJsonDocument<200> doc;
+  // add these values into the post
+  doc["scene_name"] = getParam("scene"); // Taken from the hivemind_config
+  doc["cabinet_name"] = getParam("cabinet_name"); // Taken from the hivemind_config
+  doc["token"] = getParam("token"); // Taken from the hivemind_config
+  
+  doc["action"] = "sign_in"; // This needs to be set depending on if that button is signed in already or not
+  doc["card"] = "04584b91720000"; //This is Bens fixed card ID just for testing
+  doc["player"] = "1"; // This value needs to change so that it's the right player not static
+     
+  String requestBody;
+  serializeJson(doc, requestBody);
+     
+  int httpResponseCode = http.POST(requestBody);
+ 
+  if(httpResponseCode>0){
+       
+    String response = http.getString();                       
+       
+    Serial.println(httpResponseCode);   
+    Serial.println(response); 
+  }
+}
+
 void saveParamCallback(){
   Serial.println("Your config settings");
   Serial.println("PARAM token = " + getParam("token"));
+  Serial.println("PARAM scene_name = " + getParam("scene_name"));
+  Serial.println("PARAM cabinet_name = " + getParam("cabinet_name"));
   Serial.println("PARAM cabinet_ip = " + getParam("cabinet_ip"));
   Serial.println("PARAM hivemind_ip = " + getParam("hivemind_ip"));
   Serial.println("PARAM cab_color = " + getParam("cab_color"));
@@ -163,7 +223,7 @@ void Wifi_succeed(){
 }
 
 void BootLights(){
-    for(int i=0; i<5; i++) {
+    for(int i=0; i<1; i++) {
         for(int i=0; i<NUMPIXELS; i++) { // this will be our boot animation
             pixels.setPixelColor(i, pixels.Color(128, 200, 0));
             pixels.show();   // Send the updated pixel colors to the hardware.
@@ -175,35 +235,40 @@ void BootLights(){
             delay(100);
         }
     }
+    for(int i=0; i<NUMPIXELS; i++) { // this will be our boot animation
+        pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+        pixels.show();   // Send the updated pixel colors to the hardware.
+        delay(100);
+    }
 }
 
-void ReadNFC(){
-    Serial.println("Trying to read card!");
-    boolean success;
-    uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };	// Buffer to store the returned UID
-    uint8_t uidLength;	// Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+void ReadNFC(void * pvParameters){
+    Serial.print("NFC running on core ");
+    Serial.println(xPortGetCoreID());
+    for(;;){
+        boolean success;
+        uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };	// Buffer to store the returned UID
+        uint8_t uidLength;	// Length of the UID (4 or 7 bytes depending on ISO14443A card type)
 
-    // Wait for an ISO14443A type cards (Mifare, etc.).  When one is found
-    // 'uid' will be populated with the UID, and uidLength will indicate
-    // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
-    success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
-    if (success) {
-      // Wait 1 second before continuing
-      Serial.println("Found a card!");
-      Serial.print("UID Length: ");Serial.print(uidLength, DEC);Serial.println(" bytes");
-      Serial.print("UID Value: ");
-      for (uint8_t i=0; i < uidLength; i++)
-      {
-        Serial.print(" 0x");Serial.print(uid[i], HEX);
-      }
-      Serial.println("");
+        // Wait for an ISO14443A type cards (Mifare, etc.).  When one is found
+        // 'uid' will be populated with the UID, and uidLength will indicate
+        // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
+        success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
+        if (success) {
+          // Wait 1 second before continuing
+          Serial.println("Found a card!");
+          Serial.print("UID Length: ");Serial.print(uidLength, DEC);Serial.println(" bytes");
+          Serial.print("UID Value: ");
+          for (uint8_t i=0; i < uidLength; i++)
+          {
+            Serial.print(uid[i], HEX);
+          }
+          Serial.println("");
 
-      delay(1000);
-    }
-    else
-    {
-      // PN532 probably timed out waiting for a card
-      Serial.println("Timed out waiting for a card");
+          //this is just to turn the lights on
+          BootLights();
+          delay(1000);
+        }
     }
 }
 
@@ -219,8 +284,8 @@ void SignOutData(int player){
 }
 
 void loop() {
+  /*
   ReadNFC();
-
   for (int thisPlayer = 0; thisPlayer < 5; thisPlayer++) {
       ButtonStates[thisPlayer] = digitalRead(Buttons[thisPlayer]);
 
@@ -232,4 +297,5 @@ void loop() {
       }
   }
   pixels.show();
+  */
 }
